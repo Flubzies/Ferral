@@ -6,16 +6,15 @@ using UnityEngine.AI;
 
 public class Character : MonoBehaviour
 {
-	[SerializeField] int _damage;
-	[SerializeField] float _getRandomPositionRate;
-	[SerializeField] float _movementUpdateRate;
+	[SerializeField] MinMax _movementUpdateRate;
 	[SerializeField] NavMeshAgent _agent;
 	[SerializeField] float _spawnWaitTime = 2.0f;
 	[SerializeField] float _spawnDuration = 0.5f;
-	[SerializeField] Vector3 _finalScale;
-	[SerializeField] float _randomPositionRadius = 10.0f;
+	[SerializeField] MinMax _randomPositionRadius;
 
-	Vector3 _target;
+	public int _GamePlayerID { get; set; }
+
+	Vector3 _targetPosition;
 
 	private void Start ()
 	{
@@ -26,49 +25,34 @@ public class Character : MonoBehaviour
 	IEnumerator SpawnWaitTime ()
 	{
 		transform.localScale = Vector3.zero;
-		transform.DOScale (_finalScale, _spawnDuration);
+		transform.DOScale (Vector3.one, _spawnDuration);
 		yield return new WaitForSeconds (_spawnWaitTime);
 		_agent.enabled = true;
 		if (_agent.isOnNavMesh)
 		{
 			_agent.Warp (transform.position);
 		}
-		else OnDeath ();
+		else
+		{
+			OnDeath ();
+		}
 		StartCoroutine (MoveTowardsTarget ());
 	}
 
 	IEnumerator MoveTowardsTarget ()
 	{
-		if (_target != null)
+		if (_agent.isOnNavMesh)
 		{
-			if (_agent.isOnNavMesh)
-			{
-				_agent.SetDestination (_target);
-			}
-			else OnDeath ();
+			_agent.SetDestination (_targetPosition);
 		}
 		else
 		{
-			StartCoroutine (GetRandomPosition ());
+			OnDeath ();
 		}
 
-		yield return new WaitForSeconds (_movementUpdateRate);
+		yield return new WaitForSeconds (_movementUpdateRate.GetRandom);
+		_targetPosition = RandomNavmeshLocation (_randomPositionRadius.GetRandom);
 		StartCoroutine (MoveTowardsTarget ());
-	}
-
-	IEnumerator GetRandomPosition ()
-	{
-		Vector3 randPos = RandomNavmeshLocation (_randomPositionRadius);
-
-		if (randPos == null)
-		{
-			yield return new WaitForSeconds (_getRandomPositionRate);
-			StartCoroutine (GetRandomPosition ());
-		}
-		else
-		{
-			_target = randPos;
-		}
 	}
 
 	public void OnDeath ()
