@@ -43,7 +43,7 @@ public class PlayerManager : MonoBehaviour
 			return;
 		}
 	}
-	
+
 	public void OnLoadedLevel ()
 	{
 		_playerMap = new List<PlayerMap> ();
