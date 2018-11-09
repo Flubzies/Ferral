@@ -6,12 +6,6 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/_SollaraAssets/Scenes/Flubz/FlubzAbilitySelection.unity
-    guid: fe57aa5cd95f29346adfdc854c456ab4
-  - enabled: 1
-    path: Assets/_SollaraAssets/Scenes/Flubz/FlubzLevel0.unity
-    guid: 1a53ddd0b25d3d2409772e68cd76d724
-  - enabled: 1
-    path: Assets/_SollaraAssets/Scenes/Flubz/FlubzLevel1.unity
-    guid: c87c8f436d8299046b3b1942a5605008
+    path: Assets/_Flubz/Scenes/Level.unity
+    guid: 8d8738085c4a4a648b35b08a37f2ef57
   m_configObjects: {}

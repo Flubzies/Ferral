@@ -1,3 +1,4 @@
-Niloc Prototype
+University of Bolton - Game Jam 2018
 
-Project Niloc is a prototype game developed by Team Sollara as part of their major final year project for the University of Bolton.
+Developer: Farjad Mohammad
+fm96.co.uk

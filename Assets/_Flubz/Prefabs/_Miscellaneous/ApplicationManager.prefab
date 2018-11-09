@@ -689,22 +689,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!1 &1817757438384458
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 4739118581164954}
-  - component: {fileID: 114488557535578864}
-  m_Layer: 0
-  m_Name: AbilityManager
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
 --- !u!1 &1821171265236100
 GameObject:
   m_ObjectHideFlags: 0
@@ -886,19 +870,6 @@ Transform:
   m_Father: {fileID: 4839161691418332}
   m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!4 &4739118581164954
-Transform:
-  m_ObjectHideFlags: 1
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 1817757438384458}
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_Children: []
-  m_Father: {fileID: 4839161691418332}
-  m_RootOrder: 6
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!4 &4821684491815338
 Transform:
   m_ObjectHideFlags: 1
@@ -928,7 +899,6 @@ Transform:
   - {fileID: 4821684491815338}
   - {fileID: 4678228599952588}
   - {fileID: 4419044074616828}
-  - {fileID: 4739118581164954}
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -1578,37 +1548,6 @@ MonoBehaviour:
   m_FillAmount: 1
   m_FillClockwise: 1
   m_FillOrigin: 0
---- !u!114 &114488557535578864
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 1817757438384458}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: be1476522bb9e91409c9f54dd306423a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _abilityHolders:
-  - _abilityType: 0
-    _abilityColor: {r: 0, g: 1, b: 0.004898548, a: 1}
-    _abilities:
-    - {fileID: 11400000, guid: 6685515d7a61ee54cb123081de1eb441, type: 2}
-    - {fileID: 11400000, guid: 9bdb3510753481b438209c297aaa646b, type: 2}
-  - _abilityType: 1
-    _abilityColor: {r: 0, g: 0.3333335, b: 1, a: 1}
-    _abilities:
-    - {fileID: 11400000, guid: 72d7193cfc530af48a6f7b6472e7cf2c, type: 2}
-    - {fileID: 11400000, guid: 5c6a3757eebb4624990bfc3d46bbecd1, type: 2}
-  - _abilityType: 2
-    _abilityColor: {r: 1, g: 0, b: 0, a: 1}
-    _abilities:
-    - {fileID: 11400000, guid: cbe4059c82c54a747be53d900d0f4d14, type: 2}
-    - {fileID: 11400000, guid: f1fcc38b308be6f4180ef5e0c8a0f1c2, type: 2}
-  - _abilityType: 3
-    _abilityColor: {r: 1, g: 0.9166666, b: 0, a: 1}
-    _abilities:
-    - {fileID: 11400000, guid: ecff8db7b094d7d43896abb373183877, type: 2}
 --- !u!114 &114509473703616960
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -2285,18 +2224,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3851749b0c86dd744b4fa2d7cfa1a629, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _abilitySelectionScene:
-    _sceneName: FlubzAbilitySelection
-    _inputMode: 2
-  _mainMenuScene:
-    _sceneName: FlubzMainMenu
-    _inputMode: 1
-  _level0Scene:
-    _sceneName: FlubzLevel0
-    _inputMode: 2
-  _level1Scene:
-    _sceneName: FlubzLevel1
-    _inputMode: 2
+  _scene:
+    _sceneName: 
+    _inputMode: 0
   _defaultInputMode: 2
 --- !u!114 &114759141382151958
 MonoBehaviour:
@@ -2480,14 +2410,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _buttonToPressToJoinGame: JoinGame
-  _playerPrefab: {fileID: 114934606151025690, guid: 6c2f96d4d7a756643a576d12d9a8fe72,
-    type: 2}
-  _teamA:
-    _teamName: Red
-    _teamColor: {r: 0.8, g: 0.18431373, b: 0.078431375, a: 1}
-  _teamB:
-    _teamName: Blue
-    _teamColor: {r: 0.06325693, g: 0.4315431, b: 0.8602941, a: 1}
+  _playerPrefab: {fileID: 0}
 --- !u!114 &114892912737703574
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -2501,9 +2424,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _objectPools:
   - {fileID: 11400000, guid: b9da3e4e970efe44db5695f4fdab15ae, type: 2}
-  - {fileID: 11400000, guid: 4cd6201d02e8ffc46a6687c7061d303d, type: 2}
-  - {fileID: 11400000, guid: 81d86fac281bb694ca7d2ddb8dd45363, type: 2}
-  - {fileID: 11400000, guid: 5a49f1ff44691e547b4101a0e0b40a31, type: 2}
 --- !u!114 &114903171068341464
 MonoBehaviour:
   m_ObjectHideFlags: 1
