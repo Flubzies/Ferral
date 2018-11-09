@@ -13,6 +13,8 @@ public class PlayerManager : MonoBehaviour
 	[SerializeField] string _buttonToPressToJoinGame = "JoinGame";
 	[SerializeField] string _buttonToPauseGame = "PauseGame";
 	[SerializeField] Player _playerPrefab;
+	[SerializeField] InputMode _pausedInputMode = InputMode.UI;
+	InputMode _prePauseInputMode;
 
 	public List<Player> _Players { get; private set; }
 	public Action OnPlayerAdded;
@@ -20,7 +22,8 @@ public class PlayerManager : MonoBehaviour
 	public int _MaxPlayers { get { return 4; } }
 
 	[SerializeField] TMP_Text _playerCountText;
-	[SerializeField] CanvasGroup _canvasGroup;
+	[SerializeField] CanvasGroup _canvasGroupPlayerCount;
+	[SerializeField] CanvasGroup _canvasGroupPauseMenu;
 
 	List<PlayerMap> _playerMap;
 	bool _charsSpawned;
@@ -53,6 +56,13 @@ public class PlayerManager : MonoBehaviour
 
 	public void OnGameStarted ()
 	{
+		_canvasGroupPlayerCount.alpha = 0.0f;
+		_canvasGroupPlayerCount.DOFade (1.0f, 1.0f).OnComplete (OnPlayerCountFadedIn);
+	}
+
+	void OnPlayerCountFadedIn ()
+	{
+		InputManager._instance.SwitchAllPlayersToInputMode (InputMode.JoinGame);
 		_playerMap = new List<PlayerMap> ();
 		_Players = new List<Player> ();
 		_charsSpawned = false;
@@ -61,13 +71,13 @@ public class PlayerManager : MonoBehaviour
 	public void OnLevelLoaded ()
 	{
 		if (!_charsSpawned)
+		{
 			for (int i = 0; i < _playerMap.Count; i++)
 			{
 				_charsSpawned = true;
 				SpawnPlayer (i);
-				// InputManager._instance.EnablePlayerMap (i, InputMode.Gameplay);
-				// if (OnPlayerAdded != null) OnPlayerAdded.Invoke ();
 			}
+		}
 	}
 
 	void Update ()
@@ -78,7 +88,35 @@ public class PlayerManager : MonoBehaviour
 			{
 				AssignNextPlayer (i);
 			}
+			else if (ReInput.players.GetPlayer (i).GetButtonDown (_buttonToPauseGame))
+			{
+				_canvasGroupPauseMenu.DOFade (1.0f, 1.0f).OnComplete (OnPauseMenu);
+			}
 		}
+	}
+
+	public void LoadMainMenu ()
+	{
+		UnPauseMenu ();
+		_playerCountText.text = 0. ToString () + "/4";
+		ApplicationManager._instance.LoadMainMenu ();
+	}
+
+	public void OnPauseMenu ()
+	{
+		InputManager._instance.SwitchAllPlayersToInputMode (_pausedInputMode);
+		Time.timeScale = 0;
+	}
+
+	public void UnPauseMenu ()
+	{
+		_canvasGroupPauseMenu.DOFade (0.0f, 1.0f).OnComplete (OnUnPauseMenu);
+	}
+
+	void OnUnPauseMenu ()
+	{
+		Time.timeScale = 1;
+		InputManager._instance.SwitchAllPlayersToInputMode (InputMode.Gameplay);
 	}
 
 	void AssignNextPlayer (int rewiredPlayerID_)
@@ -90,10 +128,12 @@ public class PlayerManager : MonoBehaviour
 		}
 
 		_playerMap.Add (new PlayerMap (rewiredPlayerID_, rewiredPlayerID_));
-		_playerCountText.text = _playerMap.Count.ToString ();
+		_playerCountText.text = _playerMap.Count.ToString () + " / 4";
+		InputManager._instance.EnablePlayerMap (rewiredPlayerID_, InputMode.Paused);
+
 		if (_playerMap.Count == 4)
 		{
-			_canvasGroup.DOFade (0.0f, 1.0f).OnComplete (LoadLevel);
+			_canvasGroupPlayerCount.DOFade (0.0f, 1.0f).OnComplete (LoadLevel);
 		}
 	}
 

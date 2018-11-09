@@ -30,10 +30,9 @@ namespace SollaraGames.Managers
 
 		void OnSceneLoaded (Scene scene, LoadSceneMode mode)
 		{
-			Debug.Log (scene.name);
 			if (scene.name == _mainMenu._sceneName)
 			{
-				InputManager._instance.SwitchAllPlayersToInputMode (_mainMenu._inputMode);
+				InputManager._instance.SwitchAllPlayersToInputMode (InputMode.Paused);
 				PlayerManager._instance.OnGameStarted ();
 			}
 			else if (scene.name == _level._sceneName)
