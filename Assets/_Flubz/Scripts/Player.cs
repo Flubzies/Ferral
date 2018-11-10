@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using DG.Tweening;
 using Rewired;
 using Sirenix.OdinInspector;
-using SollaraGames.ObjectPooling;
 using TMPro;
 using UnityEditor;
 using UnityEngine;
@@ -58,7 +57,11 @@ public class Player : MonoBehaviour, ICharacterPlayer
     [SerializeField] TMP_Text _factionName;
     [SerializeField] LineRenderer _shootPrefab;
     [SerializeField] float _shootFadeTime = 1.0f;
-    [SerializeField] PoolObjectType _hitEffect;
+    [SerializeField] AutoDestructParticle _hitEffect;
+    [SerializeField] AutoDestructParticle _werewolfAttackEffect;
+    [SerializeField] float _timeBeforeDestroy;
+    [SerializeField] RagDoll _ragdoll;
+
     public bool _IsWereWolf { get; private set; }
 
     public void Initialize (int gamePlayerID_, bool isWereWolf_ = false)
@@ -121,12 +124,8 @@ public class Player : MonoBehaviour, ICharacterPlayer
 
     void OnDeath ()
     {
-        Debug.Log ("Death!");
-        if (_IsWereWolf)
-        {
-            PlayerManager._instance.GameOver (true);
-        }
-        gameObject.SetActive (false);
+        _health.OnDeath -= OnDeath;
+        _ragdoll._ragdollGFX.transform.DOScale (Vector3.zero, 1.0f).OnComplete (DestroyGO);
     }
 
     void OnDamaged ()
@@ -187,17 +186,26 @@ public class Player : MonoBehaviour, ICharacterPlayer
         }
     }
 
-    void WolfAttack (GameObject other_)
+    void WolfAttack (RaycastHit hit_)
     {
         _health.Heal (_wereWolfKillHealAmount);
-        ICharacterPlayer icharp = other_.GetComponent<ICharacterPlayer> ();
-        if (icharp != null) icharp.HasBeenKilled ();
+        ICharacterPlayer icharp = hit_.collider.gameObject.GetComponent<ICharacterPlayer> ();
+        if (icharp != null)
+        {
+            icharp.HasBeenKilled (1.0f);
+            GameObject.Instantiate (_werewolfAttackEffect, hit_.point, Quaternion.identity);
+        }
     }
 
     void CharacterAttack (GameObject other_, RaycastHit hit_)
     {
         ShootEffect (hit_, false);
-        HealthDamager.AttemptToDamage (other_, 1000);
+        ICharacterPlayer icharp = hit_.collider.gameObject.GetComponent<ICharacterPlayer> ();
+        if (icharp != null)
+        {
+            icharp.HasBeenKilled (0.1f);
+            GameObject.Instantiate (_werewolfAttackEffect, hit_.point, Quaternion.identity);
+        }
     }
 
     void Attack ()
@@ -215,13 +223,13 @@ public class Player : MonoBehaviour, ICharacterPlayer
             if (hit.collider.gameObject.CompareTag ("Character"))
             {
                 Debug.Log ("Hit character");
-                if (_IsWereWolf) WolfAttack (hit.collider.gameObject);
+                if (_IsWereWolf) WolfAttack (hit);
                 else CharacterAttack (hit.collider.gameObject, hit);
             }
             else if (hit.collider.gameObject.CompareTag ("Player"))
             {
                 Debug.Log ("Hit player");
-                if (_IsWereWolf) WolfAttack (hit.collider.gameObject);
+                if (_IsWereWolf) WolfAttack (hit);
                 else CharacterAttack (hit.collider.gameObject, hit);
             }
             else if (!_IsWereWolf)
@@ -236,22 +244,22 @@ public class Player : MonoBehaviour, ICharacterPlayer
         }
     }
 
-    LineRenderer _lineRenderer = null;
-
     void ShootEffect (RaycastHit hit_, bool missed_, float attackRange_ = 0.0f)
     {
+        LineRenderer lr = null;
+
         if (!missed_)
         {
-        Vector3[] pos = new Vector3[]
-        {
-        GetFirePoint.position,
-        GetFirePoint.position + (GetFirePoint.forward * (hit_.distance / 2.0f)),
-        hit_.point
+            Vector3[] pos = new Vector3[]
+            {
+                GetFirePoint.position,
+                GetFirePoint.position + (GetFirePoint.forward * (hit_.distance / 2.0f)),
+                hit_.point
             };
 
-            _lineRenderer = Instantiate (_shootPrefab, GetFirePoint.forward + GetFirePoint.position, Quaternion.identity);
-            _lineRenderer.SetPositions (pos);
-            PoolManager._instance.GetObjectFromPool (_hitEffect, hit_.point, Quaternion.identity);
+            lr = Instantiate (_shootPrefab, GetFirePoint.forward + GetFirePoint.position, Quaternion.identity);
+            lr.SetPositions (pos);
+            GameObject.Instantiate (_hitEffect, hit_.point, Quaternion.identity);
         }
         else
         {
@@ -263,26 +271,38 @@ public class Player : MonoBehaviour, ICharacterPlayer
                 endPos
             };
 
-            _lineRenderer = Instantiate (_shootPrefab, GetFirePoint.forward + GetFirePoint.position, Quaternion.identity);
-            _lineRenderer.SetPositions (pos);
-            PoolManager._instance.GetObjectFromPool (_hitEffect, endPos, Quaternion.identity);
+            lr = Instantiate (_shootPrefab, GetFirePoint.forward + GetFirePoint.position, Quaternion.identity);
+            lr.SetPositions (pos);
+            GameObject.Instantiate (_hitEffect, endPos, Quaternion.identity);
         }
 
         Color2 cola = new Color2 (Color.white, Color.white);
         Color2 colb = new Color2 (Color.clear, Color.clear);
-        _lineRenderer.DOColor (cola, colb, _shootFadeTime).OnComplete (DestroyLR);
+        lr.DOColor (cola, colb, _shootFadeTime);
+        Destroy (lr.gameObject, _shootFadeTime + 0.5f);
 
     }
 
-    void DestroyLR ()
+    public void HasBeenKilled (float timeBeforeKill_)
     {
-        if (_lineRenderer != null) Destroy (_lineRenderer.gameObject);
+        StartCoroutine (KillWait (timeBeforeKill_));
     }
 
-    public void HasBeenKilled ()
+    IEnumerator KillWait (float timeBeforeKill_)
     {
-        // disable all colliders,
-        // do death animation
+        yield return new WaitForSeconds (timeBeforeKill_);
+        _ragdoll.ActivateRagDoll ();
+        yield return new WaitForSeconds (_timeBeforeDestroy);
+        _health.Damage (1000);
+    }
+
+    void DestroyGO ()
+    {
+        Destroy (gameObject);
+        if (_IsWereWolf)
+        {
+            PlayerManager._instance.GameOver (true);
+        }
     }
 
     [System.Serializable]
@@ -309,5 +329,5 @@ public class Player : MonoBehaviour, ICharacterPlayer
 }
 public interface ICharacterPlayer
 {
-    void HasBeenKilled ();
+    void HasBeenKilled (float timeBeforeKill_);
 }

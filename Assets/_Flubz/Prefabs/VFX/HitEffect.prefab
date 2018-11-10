@@ -20,7 +20,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4886708780406678}
   - component: {fileID: 198661049272875700}
-  - component: {fileID: 114619547334316206}
+  - component: {fileID: 114930302831648294}
   - component: {fileID: 199434172939393096}
   m_Layer: 0
   m_Name: HitEffect
@@ -42,7 +42,7 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &114619547334316206
+--- !u!114 &114930302831648294
 MonoBehaviour:
   m_ObjectHideFlags: 1
   m_CorrespondingSourceObject: {fileID: 0}
@@ -50,13 +50,11 @@ MonoBehaviour:
   m_GameObject: {fileID: 1526647531847876}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: bdf8d0bfa46f8304ea00107ac4cc6b4d, type: 3}
+  m_Script: {fileID: 11500000, guid: 102df2b4874d70247903bb5efb3fae32, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _poolObjectType: {fileID: 0}
-  _isPooled: 0
   _ps: {fileID: 198661049272875700}
-  _additionalTime: 0.5
+  _additionalTime: 0.4
 --- !u!198 &198661049272875700
 ParticleSystem:
   m_ObjectHideFlags: 1

@@ -10,12 +10,10 @@ public class Character : MonoBehaviour, ICharacterPlayer
 	[SerializeField] NavMeshAgent _agent;
 	[SerializeField] float _spawnWaitTime = 2.0f;
 	[SerializeField] float _spawnDuration = 0.5f;
+	[SerializeField] float _timeBeforeDestroy = 4f;
 	[SerializeField] MinMax _randomPositionRadius;
 	[SerializeField] Health _health;
-	[SerializeField] Rigidbody _rb;
-	[SerializeField] Collider _characterCollider;
-	[SerializeField] GameObject _characterGFX;
-	[SerializeField] GameObject _ragdollGFX;
+	[SerializeField] RagDoll _ragdoll;
 
 	public int _GamePlayerID { get; set; }
 
@@ -62,32 +60,48 @@ public class Character : MonoBehaviour, ICharacterPlayer
 		StartCoroutine (MoveTowardsTarget ());
 	}
 
-	public void HasBeenKilled ()
+	public void HasBeenKilled (float timeBeforeKill_)
 	{
-		_rb.isKinematic = true;
-		_characterCollider.enabled = false;
-		_agent.enabled = false;
-		_characterGFX.SetActive (false);
-		_ragdollGFX.SetActive (true);
+		StartCoroutine (KillWait (timeBeforeKill_));
 	}
 
-	void ActivateRagDoll ()
+	IEnumerator KillWait (float timeBeforeKill_)
 	{
-		_rb.isKinematic = true;
-		_characterCollider.enabled = false;
-		_agent.enabled = false;
-		_characterGFX.SetActive (false);
-		_ragdollGFX.SetActive (true);
+		yield return new WaitForSeconds (timeBeforeKill_);
+		_ragdoll.ActivateRagDoll ();
+		yield return new WaitForSeconds (_timeBeforeDestroy);
+		_health.Damage (1000);
 	}
 
 	public void OnDeath ()
 	{
 		Debug.Log ("An innocent villager was killed!");
 		_health.OnDeath -= OnDeath;
-		gameObject.SetActive (false);
-		// _agent.speed = 0;
-		// StopCoroutine (MoveTowardsTarget ());
-		// transform.DOScale (Vector3.zero, _spawnDuration).OnComplete (DestroyGO);
+		_ragdoll._ragdollGFX.transform.DOScale (Vector3.zero, _spawnDuration).OnComplete (DestroyGO);
 	}
 
+	void DestroyGO ()
+	{
+		Destroy (gameObject);
+	}
+
+}
+
+[System.Serializable]
+public class RagDoll
+{
+	public Rigidbody _rb;
+	public Collider _characterCollider;
+	public GameObject _characterGFX;
+	public GameObject _ragdollGFX;
+	public NavMeshAgent _agent;
+
+	public void ActivateRagDoll ()
+	{
+		_rb.isKinematic = true;
+		_characterCollider.enabled = false;
+		if (_agent != null) _agent.enabled = false;
+		_characterGFX.SetActive (false);
+		_ragdollGFX.SetActive (true);
+	}
 }

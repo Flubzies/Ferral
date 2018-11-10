@@ -634,17 +634,19 @@ MonoBehaviour:
     _min: 6
     _max: 12
   _health: {fileID: 114419515554482640}
-  _rb: {fileID: 54016214554511392}
-  _characterCollider: {fileID: 136423069256601190}
-  _characterGFX: {fileID: 1405543009303206}
-  _ragdollGFX: {fileID: 1612507262213832}
+  _ragdoll:
+    _rb: {fileID: 54016214554511392}
+    _characterCollider: {fileID: 136423069256601190}
+    _characterGFX: {fileID: 1405543009303206}
+    _ragdollGFX: {fileID: 1612507262213832}
+    _agent: {fileID: 195615869447768280}
 --- !u!114 &114189114741399486
 MonoBehaviour:
   m_ObjectHideFlags: 1
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1981036696718186}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 88cfd6322bf100148adcd50bc6f6fbd5, type: 3}
   m_Name: 
@@ -659,7 +661,7 @@ MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1087613422864560}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 88cfd6322bf100148adcd50bc6f6fbd5, type: 3}
   m_Name: 
