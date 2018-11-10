@@ -21,7 +21,7 @@ GameObject:
   - component: {fileID: 224211455613578742}
   - component: {fileID: 222129220278490200}
   - component: {fileID: 114592653539219030}
-  m_Layer: 9
+  m_Layer: 13
   m_Name: Heart
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -38,7 +38,7 @@ GameObject:
   - component: {fileID: 224729856018824374}
   - component: {fileID: 222104676234886018}
   - component: {fileID: 114127307054933852}
-  m_Layer: 9
+  m_Layer: 13
   m_Name: PlayerUI
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -53,7 +53,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4918529360639412}
-  m_Layer: 0
+  m_Layer: 13
   m_Name: GFX
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -71,7 +71,7 @@ GameObject:
   - component: {fileID: 33140806741802502}
   - component: {fileID: 23264323738832198}
   - component: {fileID: 65350457228179164}
-  m_Layer: 0
+  m_Layer: 13
   m_Name: Forward
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -86,7 +86,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 224358224104540726}
-  m_Layer: 9
+  m_Layer: 13
   m_Name: PlayerHealth
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -104,7 +104,7 @@ GameObject:
   - component: {fileID: 33865811500792906}
   - component: {fileID: 23085960596071836}
   - component: {fileID: 114563206688347428}
-  m_Layer: 0
+  m_Layer: 13
   m_Name: Mesh
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -123,9 +123,9 @@ GameObject:
   - component: {fileID: 54926104384927890}
   - component: {fileID: 114029900018425990}
   - component: {fileID: 114835714995692278}
-  m_Layer: 9
+  m_Layer: 13
   m_Name: PlayerCharacter
-  m_TagString: Untagged
+  m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -141,7 +141,7 @@ GameObject:
   - component: {fileID: 223114939631667742}
   - component: {fileID: 114470021684011216}
   - component: {fileID: 114416295373001410}
-  m_Layer: 9
+  m_Layer: 13
   m_Name: PlayerCanvas
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -158,8 +158,8 @@ GameObject:
   - component: {fileID: 224592631824763286}
   - component: {fileID: 222401647351093064}
   - component: {fileID: 114397105697222274}
-  m_Layer: 9
-  m_Name: PlayerID
+  m_Layer: 13
+  m_Name: FactionName
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -175,7 +175,7 @@ GameObject:
   - component: {fileID: 4099138268258308}
   - component: {fileID: 33169653698949566}
   - component: {fileID: 23630701731994270}
-  m_Layer: 0
+  m_Layer: 13
   m_Name: SeeThrough
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -420,12 +420,11 @@ MonoBehaviour:
   _movementDeadZone: 0.01
   _playerRB: {fileID: 54926104384927890}
   _cameraOffsetTag: CameraOffset
+  _sprintSpeedModifier: 3
   _rotSpeed: 4
   _playerUI: {fileID: 224729856018824374}
-  _UIXPositionOffset: 800
   _health: {fileID: 114835714995692278}
   _healthBar: {fileID: 114592653539219030}
-  _playerID: {fileID: 114397105697222274}
   _healthFlashColor: {r: 1, g: 1, b: 1, a: 0.5529412}
   _meshRenderer: {fileID: 23085960596071836}
   _firePoint: {fileID: 4386602862439904}
@@ -444,7 +443,21 @@ MonoBehaviour:
     _InGameUILeft: InGameUIDpadL
     _InGameUISubmit: InGameUISubmit
     _InGameUINextCategory: InGameUICancel
-  _defaultHealthColor: {r: 0, g: 0, b: 0, a: 0}
+  _wolfAttackRange: 2
+  _playerAttackRange: 12
+  _healthReductionRate: 0.25
+  _wereWolfKillHealAmount: 10
+  _characters:
+    serializedVersion: 2
+    m_Bits: 8192
+  _obstacles:
+    serializedVersion: 2
+    m_Bits: 256
+  _factionName: {fileID: 114397105697222274}
+  _shootPrefab: {fileID: 120833581841834656, guid: 7b12dc6bb5d21884982f130929d042cb,
+    type: 2}
+  _shootFadeTime: 1
+  _hitEffect: {fileID: 11400000, guid: a58b9c2117d16bc48a361c963eeaae1c, type: 2}
 --- !u!114 &114127307054933852
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -491,7 +504,7 @@ MonoBehaviour:
       m_Calls: []
     m_TypeName: UnityEngine.UI.MaskableGraphic+CullStateChangedEvent, UnityEngine.UI,
       Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
-  m_text: 1
+  m_text: Human
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: ab4930e7aafafc24ebd8fbb13d1026d0, type: 2}
   m_sharedMaterial: {fileID: 21315962949300984, guid: ab4930e7aafafc24ebd8fbb13d1026d0,
@@ -519,8 +532,8 @@ MonoBehaviour:
   m_outlineColor:
     serializedVersion: 2
     rgba: 4278190080
-  m_fontSize: 72
-  m_fontSizeBase: 72
+  m_fontSize: 42
+  m_fontSizeBase: 42
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
@@ -557,10 +570,10 @@ MonoBehaviour:
   m_firstVisibleCharacter: 0
   m_useMaxVisibleDescender: 1
   m_pageToDisplay: 1
-  m_margin: {x: 0, y: 0, z: 0, w: 0}
+  m_margin: {x: -93.39421, y: 0, z: -19.555742, w: 0}
   m_textInfo:
     textComponent: {fileID: 114397105697222274}
-    characterCount: 1
+    characterCount: 5
     spriteCount: 0
     spaceCount: 0
     wordCount: 1
@@ -661,7 +674,7 @@ MonoBehaviour:
   m_Type: 3
   m_PreserveAspect: 1
   m_FillCenter: 1
-  m_FillMethod: 4
+  m_FillMethod: 1
   m_FillAmount: 1
   m_FillClockwise: 1
   m_FillOrigin: 0
@@ -679,9 +692,9 @@ MonoBehaviour:
   _initialHealth: 500
   _maxHealth: 500
   _debug: 0
-  _invulnerableAfterDamage: 0
+  _invulnerableAfterDamage: 1
   _invulnerabilityEvent:
-    _coolDownTimeInSeconds: 1
+    _coolDownTimeInSeconds: 0
 --- !u!136 &136169206735559720
 CapsuleCollider:
   m_ObjectHideFlags: 1
@@ -798,16 +811,16 @@ RectTransform:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1622552760939104}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 1.0000042, y: 1.0000042, z: 1.0000042}
   m_Children: []
   m_Father: {fileID: 224729856018824374}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.5, y: 0.5}
-  m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: -4}
+  m_AnchorMin: {x: 0, y: 0.5}
+  m_AnchorMax: {x: 0, y: 0.5}
+  m_AnchoredPosition: {x: 300, y: 0}
   m_SizeDelta: {x: 200, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!224 &224729856018824374
@@ -828,5 +841,5 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 300, y: 80}
+  m_SizeDelta: {x: 480, y: 80}
   m_Pivot: {x: 0, y: 1}

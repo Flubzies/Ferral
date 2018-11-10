@@ -17,6 +17,22 @@ public class PlayerManager : MonoBehaviour
 	InputMode _prePauseInputMode;
 
 	public List<Player> _Players { get; private set; }
+	public Player GetWolf
+	{
+		get
+		{
+			if (_Players != null)
+			{
+				foreach (var item in _Players)
+				{
+					if (item._IsWereWolf)
+						return item;
+				}
+			}
+			return null;
+		}
+	}
+
 	public Action OnPlayerAdded;
 	public Action OnPlayerRemoved;
 	public int _MaxPlayers { get { return 4; } }
@@ -24,9 +40,14 @@ public class PlayerManager : MonoBehaviour
 	[SerializeField] TMP_Text _playerCountText;
 	[SerializeField] CanvasGroup _canvasGroupPlayerCount;
 	[SerializeField] CanvasGroup _canvasGroupPauseMenu;
+	[SerializeField] bool _straightToLevel;
+	[TextArea][SerializeField] string _gameWonWolfText;
+	[TextArea][SerializeField] string _gameWonHumanText;
+	[SerializeField] TMP_Text _victoryText;
 
 	List<PlayerMap> _playerMap;
 	bool _charsSpawned;
+	int _toBecomeWereWolf;
 
 	public static PlayerManager _instance = null;
 	public Rewired.Player GetRewiredPlayer (int gamePlayerID_)
@@ -52,10 +73,13 @@ public class PlayerManager : MonoBehaviour
 			Destroy (gameObject);
 			return;
 		}
+		if (_straightToLevel) _canvasGroupPlayerCount.alpha = 0.0f;
+		else LoadMainMenu ();
 	}
 
 	public void OnGameStarted ()
 	{
+		if (_straightToLevel) _straightToLevel = false;
 		_canvasGroupPlayerCount.alpha = 0.0f;
 		_canvasGroupPlayerCount.DOFade (1.0f, 1.0f).OnComplete (OnPlayerCountFadedIn);
 	}
@@ -70,13 +94,18 @@ public class PlayerManager : MonoBehaviour
 
 	public void OnLevelLoaded ()
 	{
-		if (!_charsSpawned)
+		_toBecomeWereWolf = UnityEngine.Random.Range (0, 4);
+		if (!_charsSpawned && _playerMap != null)
 		{
 			for (int i = 0; i < _playerMap.Count; i++)
 			{
 				_charsSpawned = true;
 				SpawnPlayer (i);
 			}
+		}
+		else if (_straightToLevel)
+		{
+			OnPlayerCountFadedIn ();
 		}
 	}
 
@@ -90,7 +119,7 @@ public class PlayerManager : MonoBehaviour
 			}
 			else if (ReInput.players.GetPlayer (i).GetButtonDown (_buttonToPauseGame))
 			{
-				_canvasGroupPauseMenu.DOFade (1.0f, 1.0f).OnComplete (OnPauseMenu);
+				StartPause ();
 			}
 		}
 	}
@@ -98,14 +127,20 @@ public class PlayerManager : MonoBehaviour
 	public void LoadMainMenu ()
 	{
 		UnPauseMenu ();
-		_playerCountText.text = 0. ToString () + "/4";
+		_playerCountText.text = 0. ToString () + " / 4";
 		ApplicationManager._instance.LoadMainMenu ();
+	}
+
+	void StartPause (string s = "Game Paused")
+	{
+		_victoryText.text = s;
+		_canvasGroupPauseMenu.DOFade (1.0f, 1.0f).OnComplete (OnPauseMenu);
 	}
 
 	public void OnPauseMenu ()
 	{
 		InputManager._instance.SwitchAllPlayersToInputMode (_pausedInputMode);
-		Time.timeScale = 0;
+		// Time.timeScale = 0;
 	}
 
 	public void UnPauseMenu ()
@@ -115,7 +150,7 @@ public class PlayerManager : MonoBehaviour
 
 	void OnUnPauseMenu ()
 	{
-		Time.timeScale = 1;
+		// Time.timeScale = 1;
 		InputManager._instance.SwitchAllPlayersToInputMode (InputMode.Gameplay);
 	}
 
@@ -131,7 +166,9 @@ public class PlayerManager : MonoBehaviour
 		_playerCountText.text = _playerMap.Count.ToString () + " / 4";
 		InputManager._instance.EnablePlayerMap (rewiredPlayerID_, InputMode.Paused);
 
-		if (_playerMap.Count == 4)
+		if (_straightToLevel) SpawnPlayer (rewiredPlayerID_);
+
+		if (_playerMap.Count == 4 && !_straightToLevel)
 		{
 			_canvasGroupPlayerCount.DOFade (0.0f, 1.0f).OnComplete (LoadLevel);
 		}
@@ -156,8 +193,10 @@ public class PlayerManager : MonoBehaviour
 
 	public void SpawnPlayer (int gamePlayerID_)
 	{
-		Player player = (Player) Instantiate (_playerPrefab, Vector2.zero + (UnityEngine.Random.insideUnitCircle * 5.0f), Quaternion.identity);
-		player.Initialize (gamePlayerID_);
+		Vector2 spawnPos = UnityEngine.Random.insideUnitCircle * 5.0f;
+		Player player = (Player) Instantiate (_playerPrefab, new Vector3 (spawnPos.x, 0, spawnPos.y), Quaternion.identity);
+		if (gamePlayerID_ == _toBecomeWereWolf) player.Initialize (gamePlayerID_, true);
+		else player.Initialize (gamePlayerID_);
 
 		if (gamePlayerID_ == 0 || gamePlayerID_ == 2)
 		{
@@ -170,13 +209,22 @@ public class PlayerManager : MonoBehaviour
 			else if (gamePlayerID_ == 3) player.SetupUIPosition (true, true);
 		}
 
+		if (_straightToLevel) InputManager._instance.EnablePlayerMap (gamePlayerID_, InputMode.Gameplay);
+
 		_Players.Add (player);
 	}
 
 	public void RemovePlayer (Player player_)
 	{
 		Destroy (player_.gameObject);
+		InputManager._instance.EnablePlayerMap (player_._GamePlayerID, InputMode.Paused);
 		_Players = FindObjectsOfType<Player> ().ToList ();
 		if (OnPlayerRemoved != null) OnPlayerRemoved.Invoke ();
+	}
+
+	public void GameOver (bool wonByHumans_)
+	{
+		if (wonByHumans_) StartPause (_gameWonHumanText);
+		else StartPause (_gameWonWolfText);
 	}
 }

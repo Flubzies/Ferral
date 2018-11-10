@@ -42,7 +42,7 @@ public class Health : MonoBehaviour
 		}
 	}
 
-	void Start ()
+	void Awake ()
 	{
 		_invulnerabilityEvent.Initialize (this);
 		ResetVariables ();

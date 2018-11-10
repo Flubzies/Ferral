@@ -32,7 +32,7 @@ namespace SollaraGames.Managers
 		{
 			if (scene.name == _mainMenu._sceneName)
 			{
-				InputManager._instance.SwitchAllPlayersToInputMode (InputMode.Paused);
+				InputManager._instance.SwitchAllPlayersToInputMode (_mainMenu._inputMode);
 				PlayerManager._instance.OnGameStarted ();
 			}
 			else if (scene.name == _level._sceneName)

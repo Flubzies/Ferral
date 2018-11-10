@@ -1,31 +1,32 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections;
+using System.Collections.Generic;
 using DG.Tweening;
 using Rewired;
 using Sirenix.OdinInspector;
+using SollaraGames.ObjectPooling;
 using TMPro;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class Player : MonoBehaviour
+public class Player : MonoBehaviour, ICharacterPlayer
 {
     [Title ("Player Movement")]
     [SerializeField] float _moveSpeed = 1.0f;
     [SerializeField] float _movementDeadZone = 0.01f;
     [SerializeField] Rigidbody _playerRB;
     [SerializeField] string _cameraOffsetTag = "CameraOffset";
+    [SerializeField] float _sprintSpeedModifier;
 
     [Title ("Player Rotation")]
     [SerializeField] float _rotSpeed = 1.0f;
 
     [Title ("Player UI")]
     [SerializeField] RectTransform _playerUI;
-    [SerializeField] int _UIXPositionOffset = 620;
 
     [Title ("Player Health")]
     [SerializeField] Health _health;
     [SerializeField] Image _healthBar;
-    [SerializeField] TMP_Text _playerID;
     [SerializeField] Color _healthFlashColor;
 
     [Title ("Player Properties")]
@@ -42,12 +43,25 @@ public class Player : MonoBehaviour
     public int _GamePlayerID { get; set; }
 
     Transform _cameraOffset;
-    [SerializeField][ReadOnly] Color _defaultHealthColor;
+    Color _defaultHealthColor;
 
     Vector3 _MovementAxis { get; set; }
     Rewired.Player _Input { get { return PlayerManager._instance.GetRewiredPlayer (_GamePlayerID); } }
 
-    public void Initialize (int gamePlayerID_)
+    [Title ("Game Properties")]
+    [SerializeField] float _wolfAttackRange = 2.0f;
+    [SerializeField] float _playerAttackRange = 12.0f;
+    [SerializeField] float _healthReductionRate;
+    [SerializeField] int _wereWolfKillHealAmount;
+    [SerializeField] LayerMask _characters;
+    [SerializeField] LayerMask _obstacles;
+    [SerializeField] TMP_Text _factionName;
+    [SerializeField] LineRenderer _shootPrefab;
+    [SerializeField] float _shootFadeTime = 1.0f;
+    [SerializeField] PoolObjectType _hitEffect;
+    public bool _IsWereWolf { get; private set; }
+
+    public void Initialize (int gamePlayerID_, bool isWereWolf_ = false)
     {
         if (!_playerRB) _playerRB = GetComponent<Rigidbody> ();
         _cameraOffset = GameObject.FindGameObjectWithTag (_cameraOffsetTag).transform;
@@ -58,7 +72,11 @@ public class Player : MonoBehaviour
         GetMoveSpeedModifer = 1.0f;
         GetRotSpeedModifer = 1.0f;
         _GamePlayerID = gamePlayerID_;
-        _playerID.text = (gamePlayerID_ + 1).ToString ();
+        _IsWereWolf = isWereWolf_;
+        if (_IsWereWolf)
+        {
+            SetupWereWolf ();
+        }
 
         _defaultHealthColor = _healthBar.color;
     }
@@ -70,6 +88,22 @@ public class Player : MonoBehaviour
 
         PlayerMovement ();
         FlashHealthBar ();
+        if (_Input.GetButtonDown (_playerInput._actionA))
+            Attack ();
+    }
+
+    void SetupWereWolf ()
+    {
+        Debug.Log ("Setup WereWolf " + _GamePlayerID + " " + _IsWereWolf);
+        _factionName.text = "Werewolf";
+        StartCoroutine (HealthReduction ());
+    }
+
+    IEnumerator HealthReduction ()
+    {
+        _health.Damage (2);
+        yield return new WaitForSeconds (_healthReductionRate);
+        StartCoroutine (HealthReduction ());
     }
 
     void FlashHealthBar ()
@@ -87,8 +121,12 @@ public class Player : MonoBehaviour
 
     void OnDeath ()
     {
+        Debug.Log ("Death!");
+        if (_IsWereWolf)
+        {
+            PlayerManager._instance.GameOver (true);
+        }
         gameObject.SetActive (false);
-        // PlayerManager._instance.RemovePlayer (this);
     }
 
     void OnDamaged ()
@@ -105,6 +143,11 @@ public class Player : MonoBehaviour
     private void PlayerMovement ()
     {
         Vector3 movement = new Vector3 (_Input.GetAxis (_playerInput._movementX), 0, _Input.GetAxis (_playerInput._movementY));
+        if (_Input.GetButton (_playerInput._actionB) && _IsWereWolf)
+        {
+            GetMoveSpeedModifer = _sprintSpeedModifier;
+        }
+        else GetMoveSpeedModifer = 1.0f;
 
         if (movement.magnitude > _movementDeadZone)
         {
@@ -140,8 +183,106 @@ public class Player : MonoBehaviour
         }
         if (xPositionOffset_)
         {
-            _playerUI.position += (Vector3.right * _UIXPositionOffset);
+            _playerUI.position += (Vector3.right * (Screen.width - _playerUI.rect.width));
         }
+    }
+
+    void WolfAttack (GameObject other_)
+    {
+        _health.Heal (_wereWolfKillHealAmount);
+        ICharacterPlayer icharp = other_.GetComponent<ICharacterPlayer> ();
+        if (icharp != null) icharp.HasBeenKilled ();
+    }
+
+    void CharacterAttack (GameObject other_, RaycastHit hit_)
+    {
+        ShootEffect (hit_, false);
+        HealthDamager.AttemptToDamage (other_, 1000);
+    }
+
+    void Attack ()
+    {
+        RaycastHit hit;
+        float _attackRange;
+        if (_IsWereWolf) _attackRange = _wolfAttackRange;
+        else _attackRange = _playerAttackRange;
+
+        Physics.Raycast (_firePoint.position, _firePoint.forward * _attackRange, out hit, _attackRange, _characters);
+        if (hit.collider == null) Physics.Raycast (_firePoint.position, _firePoint.forward * _attackRange, out hit, _attackRange, _obstacles);
+
+        if (hit.collider != null)
+        {
+            if (hit.collider.gameObject.CompareTag ("Character"))
+            {
+                Debug.Log ("Hit character");
+                if (_IsWereWolf) WolfAttack (hit.collider.gameObject);
+                else CharacterAttack (hit.collider.gameObject, hit);
+            }
+            else if (hit.collider.gameObject.CompareTag ("Player"))
+            {
+                Debug.Log ("Hit player");
+                if (_IsWereWolf) WolfAttack (hit.collider.gameObject);
+                else CharacterAttack (hit.collider.gameObject, hit);
+            }
+            else if (!_IsWereWolf)
+            {
+                ShootEffect (hit, false);
+            }
+        }
+        else
+        {
+            if (!_IsWereWolf) ShootEffect (hit, true, _attackRange);
+            Debug.Log ("Hit nothing.");
+        }
+    }
+
+    LineRenderer _lineRenderer = null;
+
+    void ShootEffect (RaycastHit hit_, bool missed_, float attackRange_ = 0.0f)
+    {
+        if (!missed_)
+        {
+        Vector3[] pos = new Vector3[]
+        {
+        GetFirePoint.position,
+        GetFirePoint.position + (GetFirePoint.forward * (hit_.distance / 2.0f)),
+        hit_.point
+            };
+
+            _lineRenderer = Instantiate (_shootPrefab, GetFirePoint.forward + GetFirePoint.position, Quaternion.identity);
+            _lineRenderer.SetPositions (pos);
+            PoolManager._instance.GetObjectFromPool (_hitEffect, hit_.point, Quaternion.identity);
+        }
+        else
+        {
+            Vector3 endPos = GetFirePoint.position + GetFirePoint.forward * attackRange_;
+            Vector3[] pos = new Vector3[]
+            {
+                GetFirePoint.position,
+                GetFirePoint.position + GetFirePoint.forward * (attackRange_ / 2.0f),
+                endPos
+            };
+
+            _lineRenderer = Instantiate (_shootPrefab, GetFirePoint.forward + GetFirePoint.position, Quaternion.identity);
+            _lineRenderer.SetPositions (pos);
+            PoolManager._instance.GetObjectFromPool (_hitEffect, endPos, Quaternion.identity);
+        }
+
+        Color2 cola = new Color2 (Color.white, Color.white);
+        Color2 colb = new Color2 (Color.clear, Color.clear);
+        _lineRenderer.DOColor (cola, colb, _shootFadeTime).OnComplete (DestroyLR);
+
+    }
+
+    void DestroyLR ()
+    {
+        if (_lineRenderer != null) Destroy (_lineRenderer.gameObject);
+    }
+
+    public void HasBeenKilled ()
+    {
+        // disable all colliders,
+        // do death animation
     }
 
     [System.Serializable]
@@ -164,4 +305,9 @@ public class Player : MonoBehaviour
         public string _InGameUISubmit = "InGameUISubmit";
         public string _InGameUINextCategory = "InGameUICancel";
     }
+
+}
+public interface ICharacterPlayer
+{
+    void HasBeenKilled ();
 }
