@@ -14,26 +14,40 @@ public class CharacterManager : MonoBehaviour
 
 	[SerializeField] int _characterCount;
 	[SerializeField] Character _characterPrefab;
-	[SerializeField] Vector3 _spawnOrigin;
+	[SerializeField] Transform _spawnOrigin;
 	[SerializeField] float _spawnRadius;
 	List<Character> _characters = new List<Character> ();
+	int _charactersLeft;
 
 	private void Start ()
 	{
 		SpawnCharacters ();
+		_charactersLeft = _characterCount;
 	}
 
 	private void OnDestroy ()
 	{
-		// Debug.Log ("DESTROYED!");
 		_instance = null;
+	}
+
+	public void RemoveCharacter (Character char_)
+	{
+		Destroy (char_.gameObject);
+		_charactersLeft--;
+		string s = "Villagers left: " + (_charactersLeft - _characterCount / 2).ToString () + " / " + (_characterCount / 2).ToString ();
+		PlayerManager._instance.UpdateCharCount (s);
+		if (_charactersLeft <= _characterCount / 2)
+		{
+			PlayerManager._instance.UpdateCharCount ("");
+			PlayerManager._instance.GameOver (false, true);
+		}
 	}
 
 	void SpawnCharacters ()
 	{
 		for (int i = 0; i < _characterCount; i++)
 		{
-			Vector3 spawnPos = RandomNavmeshLocation (_spawnRadius, _spawnOrigin);
+			Vector3 spawnPos = RandomNavmeshLocation (_spawnRadius, _spawnOrigin.position);
 			Character tempC = (Character) Instantiate (_characterPrefab, new Vector3 (spawnPos.x, 0, spawnPos.z), Quaternion.identity);
 			_characters.Add (tempC);
 		}

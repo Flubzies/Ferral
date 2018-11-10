@@ -14,6 +14,8 @@ public class Character : MonoBehaviour, ICharacterPlayer
 	[SerializeField] MinMax _randomPositionRadius;
 	[SerializeField] Health _health;
 	[SerializeField] RagDoll _ragdoll;
+	[SerializeField] float _velocityDeadZone;
+	[SerializeField] Animator _animator;
 
 	public int _GamePlayerID { get; set; }
 
@@ -45,6 +47,16 @@ public class Character : MonoBehaviour, ICharacterPlayer
 
 	IEnumerator MoveTowardsTarget ()
 	{
+		_ragdoll._rb.velocity = Vector3.zero;
+		if (_agent.velocity.magnitude >= (Vector3.one * _velocityDeadZone).magnitude)
+		{
+			_animator.SetBool ("isMoving", true);
+		}
+		else
+		{
+			_animator.SetBool ("isMoving", false);
+		}
+
 		if (_agent.isOnNavMesh && _targetPosition != Vector3.zero)
 		{
 			_agent.SetDestination (_targetPosition);
@@ -75,14 +87,15 @@ public class Character : MonoBehaviour, ICharacterPlayer
 
 	public void OnDeath ()
 	{
-		Debug.Log ("An innocent villager was killed!");
+		PlayerManager._instance.InformationText ("An innocent villager has just been killed!");
+		StopAllCoroutines ();
 		_health.OnDeath -= OnDeath;
 		_ragdoll._ragdollGFX.transform.DOScale (Vector3.zero, _spawnDuration).OnComplete (DestroyGO);
 	}
 
 	void DestroyGO ()
 	{
-		Destroy (gameObject);
+		CharacterManager._instance.RemoveCharacter (this);
 	}
 
 }

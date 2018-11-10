@@ -16,6 +16,7 @@ public class Player : MonoBehaviour, ICharacterPlayer
     [SerializeField] Rigidbody _playerRB;
     [SerializeField] string _cameraOffsetTag = "CameraOffset";
     [SerializeField] float _sprintSpeedModifier;
+    [SerializeField] Animator _animator;
 
     [Title ("Player Rotation")]
     [SerializeField] float _rotSpeed = 1.0f;
@@ -29,8 +30,6 @@ public class Player : MonoBehaviour, ICharacterPlayer
     [SerializeField] Color _healthFlashColor;
 
     [Title ("Player Properties")]
-    // [SerializeField] RectTransform _targetDirRect;
-    [SerializeField] MeshRenderer _meshRenderer;
     [SerializeField] Transform _firePoint;
     [SerializeField] PlayerInput _playerInput;
 
@@ -61,6 +60,8 @@ public class Player : MonoBehaviour, ICharacterPlayer
     [SerializeField] AutoDestructParticle _werewolfAttackEffect;
     [SerializeField] float _timeBeforeDestroy;
     [SerializeField] RagDoll _ragdoll;
+    [SerializeField] int _bulletCount;
+    [SerializeField] Image[] _bullets;
 
     public bool _IsWereWolf { get; private set; }
 
@@ -99,6 +100,10 @@ public class Player : MonoBehaviour, ICharacterPlayer
     {
         Debug.Log ("Setup WereWolf " + _GamePlayerID + " " + _IsWereWolf);
         _factionName.text = "Werewolf";
+        foreach (var item in _bullets)
+        {
+            item.enabled = false;
+        }
         StartCoroutine (HealthReduction ());
     }
 
@@ -142,6 +147,7 @@ public class Player : MonoBehaviour, ICharacterPlayer
     private void PlayerMovement ()
     {
         Vector3 movement = new Vector3 (_Input.GetAxis (_playerInput._movementX), 0, _Input.GetAxis (_playerInput._movementY));
+
         if (_Input.GetButton (_playerInput._actionB) && _IsWereWolf)
         {
             GetMoveSpeedModifer = _sprintSpeedModifier;
@@ -150,6 +156,7 @@ public class Player : MonoBehaviour, ICharacterPlayer
 
         if (movement.magnitude > _movementDeadZone)
         {
+            _animator.SetBool ("isMoving", true);
             _MovementAxis = _cameraOffset.forward * movement.normalized.z + _cameraOffset.right * movement.normalized.x;
 
             _playerRB.MovePosition (Vector3.Lerp (transform.position,
@@ -161,6 +168,7 @@ public class Player : MonoBehaviour, ICharacterPlayer
         else
         {
             _MovementAxis = Vector3.zero;
+            _animator.SetBool ("isMoving", false);
         }
     }
 
@@ -215,6 +223,13 @@ public class Player : MonoBehaviour, ICharacterPlayer
         if (_IsWereWolf) _attackRange = _wolfAttackRange;
         else _attackRange = _playerAttackRange;
 
+        if (!_IsWereWolf && _bulletCount <= 0) return;
+        if (!_IsWereWolf)
+        {
+            _bullets[_bulletCount - 1].enabled = false;
+            _bulletCount--;
+        }
+
         Physics.Raycast (_firePoint.position, _firePoint.forward * _attackRange, out hit, _attackRange, _characters);
         if (hit.collider == null) Physics.Raycast (_firePoint.position, _firePoint.forward * _attackRange, out hit, _attackRange, _obstacles);
 
@@ -222,13 +237,11 @@ public class Player : MonoBehaviour, ICharacterPlayer
         {
             if (hit.collider.gameObject.CompareTag ("Character"))
             {
-                Debug.Log ("Hit character");
                 if (_IsWereWolf) WolfAttack (hit);
                 else CharacterAttack (hit.collider.gameObject, hit);
             }
             else if (hit.collider.gameObject.CompareTag ("Player"))
             {
-                Debug.Log ("Hit player");
                 if (_IsWereWolf) WolfAttack (hit);
                 else CharacterAttack (hit.collider.gameObject, hit);
             }
@@ -303,6 +316,7 @@ public class Player : MonoBehaviour, ICharacterPlayer
         {
             PlayerManager._instance.GameOver (true);
         }
+        PlayerManager._instance.RemovePlayer (this);
     }
 
     [System.Serializable]
