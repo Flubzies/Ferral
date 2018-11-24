@@ -12,11 +12,8 @@ MonoBehaviour:
   m_Name: MainPool
   m_EditorClassIdentifier: 
   _poolInfo:
-  - _poolObjectType: {fileID: 0}
-    _prefab: {fileID: 0}
-    _poolSize: 400
-    _fixedSize: 0
-  - _poolObjectType: {fileID: 0}
-    _prefab: {fileID: 0}
-    _poolSize: 400
+  - _poolObjectType: {fileID: 11400000, guid: a58b9c2117d16bc48a361c963eeaae1c, type: 2}
+    _prefab: {fileID: 114619547334316206, guid: daf508894579aaf47ab09d882b653255,
+      type: 2}
+    _poolSize: 100
     _fixedSize: 0

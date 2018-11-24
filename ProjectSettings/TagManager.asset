@@ -8,6 +8,7 @@ TagManager:
   - ProjectileBeam
   - Projectile
   - GameManager
+  - Character
   layers:
   - Default
   - TransparentFX
@@ -22,7 +23,7 @@ TagManager:
   - DeathEffect
   - Floor
   - NonIntrusive
-  - 
+  - Characters
   - 
   - 
   - 
