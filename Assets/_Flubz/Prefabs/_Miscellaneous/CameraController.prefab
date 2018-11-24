@@ -112,6 +112,21 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
+--- !u!1 &1951427401887628
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 4808616426074538}
+  m_Layer: 0
+  m_Name: TargetGroup
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
 --- !u!4 &4319577432023838
 Transform:
   m_ObjectHideFlags: 1
@@ -125,6 +140,7 @@ Transform:
   - {fileID: 4915047681026352}
   - {fileID: 4620106813165930}
   - {fileID: 4913821050640162}
+  - {fileID: 4808616426074538}
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -134,8 +150,8 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1831366192439680}
-  m_LocalRotation: {x: -0.15859723, y: -0.8408035, z: 0.38288766, w: -0.3482722}
-  m_LocalPosition: {x: -40, y: 65, z: 40}
+  m_LocalRotation: {x: -0.1585971, y: -0.8408035, z: 0.38288766, w: -0.34827214}
+  m_LocalPosition: {x: -48.45, y: 65, z: 44.72}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 4703488195166596}
@@ -155,14 +171,27 @@ Transform:
   m_Father: {fileID: 4620106813165930}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!4 &4808616426074538
+Transform:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1951427401887628}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -8.45, y: 0, z: 4.72}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 4319577432023838}
+  m_RootOrder: 3
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!4 &4854714246365550
 Transform:
   m_ObjectHideFlags: 1
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1925577644431910}
-  m_LocalRotation: {x: 0.41443464, y: -0.00000014901161, z: 0.000000044703484, w: 0.9100792}
-  m_LocalPosition: {x: 0.000022888184, y: 65, z: -56.56855}
+  m_LocalRotation: {x: 0.41443458, y: -0.00000011920929, z: -0.00000008940697, w: 0.9100791}
+  m_LocalPosition: {x: 2.6375275, y: 65, z: -65.88114}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 4915047681026352}
@@ -175,7 +204,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1199694828661202}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: -8.45, y: 0, z: 4.72}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 4319577432023838}
@@ -204,7 +233,7 @@ Camera:
   m_Enabled: 1
   serializedVersion: 2
   m_ClearFlags: 2
-  m_BackGroundColor: {r: 0.4433962, g: 0.4433962, b: 0.4433962, a: 1}
+  m_BackGroundColor: {r: 0, g: 0, b: 0, a: 1}
   m_projectionMatrixMode: 1
   m_SensorSize: {x: 36, y: 24}
   m_LensShift: {x: 0, y: 0}
@@ -219,7 +248,7 @@ Camera:
   far clip plane: 5000
   field of view: 25
   orthographic: 0
-  orthographic size: 20
+  orthographic size: 1
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
@@ -304,7 +333,10 @@ MonoBehaviour:
   m_PositionMode: 0
   m_RotationMode: 0
   m_UpdateMethod: 2
-  m_Targets: []
+  m_Targets:
+  - target: {fileID: 4808616426074538}
+    weight: 1
+    radius: 0
 --- !u!114 &114270271186574600
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -389,7 +421,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8b9a305e18de0c04dbd257a21cd47087, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  sharedProfile: {fileID: 11400000, guid: fdc859095b7bee5489ed47b1db37304c, type: 2}
+  sharedProfile: {fileID: 11400000, guid: c03d6fd387c9a4747a8a961cd38a5c9b, type: 2}
   isGlobal: 1
   blendDistance: 0
   weight: 1
@@ -425,7 +457,7 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 4294967295
   stopNaNPropagation: 1
-  antialiasingMode: 1
+  antialiasingMode: 2
   temporalAntialiasing:
     jitterSpread: 0.75
     sharpness: 0.25
