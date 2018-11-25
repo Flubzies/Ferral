@@ -20,4 +20,11 @@
 # Unity3D Generated File On Crash Reports
 sysinfo.txt
 
+<<<<<<< HEAD
 
+=======
+# Unity Paid Plugins
+AmplifyShaderEditor/
+Sirenix/
+Rewired/
+>>>>>>> master
