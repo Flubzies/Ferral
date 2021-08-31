@@ -14,7 +14,3 @@ Please add these plugins to your assets folder to run the project.
 [SkySerie Freebie.](https://assetstore.unity.com/packages/2d/textures-materials/sky/skybox-series-free-103633)
 
 [Foliage Free.](https://assetstore.unity.com/packages/3d/vegetation/foliage-pack-free-66155)
-
-
-Developer: Farjad Mohammad
-fm96.co.uk
